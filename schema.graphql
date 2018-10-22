@@ -6,3 +6,9 @@ type Proposal @entity {
   paramsHash: Bytes!
   proposer: Bytes!
 }
+
+type RepHolder @entity {
+  id: ID!
+  address: Bytes!
+  reputation: BigInt!
+}

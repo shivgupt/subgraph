@@ -5,7 +5,7 @@ dataSources:
   - kind: ethereum/contract
     name: GP
     source:
-      address: '0x8940442e7f54e875c8c1c80213a4aee7eee4781c' # GenesisProtocol address
+      address: "0x8940442e7f54e875c8c1c80213a4aee7eee4781c" # GenesisProtocol address
       abi: GenesisProtocol
     mapping:
       kind: ethereum/events
@@ -20,3 +20,23 @@ dataSources:
       eventHandlers:
         - event: NewProposal(bytes32,address,uint256,address,bytes32)
           handler: newProposal
+  - kind: ethereum/contract
+    name: Reputation
+    source:
+      address: "0x13ad61aa8f695ce64711a51a6feccb48a275aaf8" # Reputation address
+      abi: Reputation
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.1
+      language: wasm/assemblyscript
+      file: ./src/reputation.ts
+      entities:
+        - RepHolder
+      abis:
+        - name: Reputation
+          file: ./abis/Reputation.json
+      eventHandlers:
+        - event: Mint(address,uint256)
+          handler: mintReputation
+        - event: Burn(address,uint256)
+          handler: burnReputation
