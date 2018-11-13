@@ -1,4 +1,4 @@
-import { Address, U256, Bytes, Entity, ByteArray, crypto, store } from '@graphprotocol/graph-ts'
+import { Address, U256, I256, Bytes, Entity, ByteArray, crypto, store, Value } from '@graphprotocol/graph-ts'
 
 export function concat(a: ByteArray, b: ByteArray): ByteArray {
   let out = new Uint8Array(a.length + b.length)
@@ -11,34 +11,60 @@ export function concat(a: ByteArray, b: ByteArray): ByteArray {
   return out as ByteArray
 }
 
-export function updateRedemption(beneficiary: Address, avatar: Address, amount: U256, proposalId: Bytes, rewardType: ByteArray, rewardString: String): void {
-  let accountId = crypto.keccak256(concat(beneficiary, avatar))
-  let rewardId = crypto.keccak256(concat(rewardType, amount as ByteArray))
-
-  let uniqueId = crypto.keccak256(concat(proposalId, concat(accountId, rewardId))).toHex()
-
-  let redemption = store.get('Redemption', uniqueId)
-  if (redemption == null) {
-    redemption = new Entity()
-    redemption.setString('accountId', accountId.toHex())
-    redemption.setString('proposalId', proposalId.toHex())
-    redemption.setString('rewardId', rewardId.toHex())
-    store.set('Redemption', uniqueId, redemption as Entity)
+export function createDao (avatar: Address): Entity {
+  let dao = store.get('DAO', avatar.toHex()) as Entity
+  if (dao === null) {
+    dao = new Entity()
+    dao.setAddress('avatarAddress', avatar)
+    dao.setArray('members', new Array<Value>())
+    store.set('DAO', avatar.toHex(), dao as Entity)
   }
-
-  let reward = store.get('Reward', rewardId.toHex())
-  if (reward == null) {
-    reward = new Entity()
-    reward.setString('id', rewardId.toHex())
-    reward.setString('type', rewardString)
-    reward.setU256('amount', amount)
-
-    store.set('Reward', rewardId.toHex(), reward as Entity)
-  }
+  return dao;
 }
 
-export const zero256 = "0x0000000000000000000000000000000000000000000000000000000000000000"
+export function createAccount (address: Address, avatar: Address): ByteArray {
+    let accountId = crypto.keccak256(concat(address, avatar))
+    let account = store.get('Account', accountId.toHex())
+    if (account == null) {
+        account = new Entity()
+        account.setString('accountId', accountId.toHex())
+        account.setAddress('dao', avatar)
+        account.setAddress('address', address)
+        account.setBoolean('hasReputation', false)
+        store.set('Account', accountId.toHex(), account as Entity)
+    }
+    return accountId
+}
 
-export function isZero(num: U256): boolean {
-  return num[0] == 0 && num[1] == 0 && num[2] == 0 && num[3] == 0;
+export function updateRedemption(
+  beneficiary: Address,
+  avatar: Address,
+  absAmount: U256,
+  signedAmount: I256,
+  proposalId: Bytes,
+  rewardType: ByteArray,
+  rewardString: String,
+  time: U256
+): void {
+    let accountId = createAccount(beneficiary, avatar)
+    let redemptionId = crypto.keccak256(
+      concat(proposalId,
+      concat(accountId,
+      concat(rewardType,
+      concat(absAmount as ByteArray,
+             signedAmount as ByteArray))))
+    ).toHex()
+
+    let redemption = new Entity()
+    redemption.setString('redemptionId', redemptionId)
+    redemption.setString('proposal', proposalId.toHex())
+    redemption.setString('account', accountId.toHex())
+    redemption.setString('type', rewardString)
+    if (absAmount == null) {
+      redemption.setI256('amount', signedAmount)
+    } else {
+      redemption.setU256('amount', absAmount)
+    }
+    redemption.setU256('time', time)
+    store.set('Redemption', redemptionId, redemption as Entity)
 }
