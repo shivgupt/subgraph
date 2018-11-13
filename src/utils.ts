@@ -1,70 +1,83 @@
-import { Address, U256, I256, Bytes, Entity, ByteArray, crypto, store, Value } from '@graphprotocol/graph-ts'
+import {
+    Address,
+    BigInt,
+    ByteArray,
+    Bytes,
+    crypto,
+    SmartContract,
+    store
+} from '@graphprotocol/graph-ts'
+
+import {
+    Account,
+    DAO,
+    Redemption
+} from './types/schema'
 
 export function concat(a: ByteArray, b: ByteArray): ByteArray {
-  let out = new Uint8Array(a.length + b.length)
-  for (let i = 0; i < a.length; i++) {
-    out[i] = a[i]
-  }
-  for (let j = 0; j < b.length; j++) {
-    out[a.length + j] = b[j]
-  }
-  return out as ByteArray
+    let out = new Uint8Array(a.length + b.length)
+    for (let i = 0; i < a.length; i++) {
+        out[i] = a[i]
+    }
+    for (let j = 0; j < b.length; j++) {
+        out[a.length + j] = b[j]
+    }
+    return out as ByteArray
 }
 
-export function createDao (avatar: Address): Entity {
-  let dao = store.get('DAO', avatar.toHex()) as Entity
-  if (dao === null) {
-    dao = new Entity()
-    dao.setAddress('avatarAddress', avatar)
-    dao.setArray('members', new Array<Value>())
-    store.set('DAO', avatar.toHex(), dao as Entity)
-  }
-  return dao;
+export function createDao (avatar: Address): DAO {
+    let dao = store.get('DAO', avatar.toHex()) as DAO
+    if (dao === null) {
+        dao = new DAO()
+        dao.avatarAddress = avatar as String
+        dao.members = new Array<String>()
+        store.set('DAO', avatar.toHex(), dao as DAO)
+    }
+    return dao;
 }
 
 export function createAccount (address: Address, avatar: Address): ByteArray {
     let accountId = crypto.keccak256(concat(address, avatar))
-    let account = store.get('Account', accountId.toHex())
+    let account = store.get('Account', accountId.toHex()) as Account
     if (account == null) {
-        account = new Entity()
-        account.setString('accountId', accountId.toHex())
-        account.setAddress('dao', avatar)
-        account.setAddress('address', address)
-        account.setBoolean('hasReputation', false)
-        store.set('Account', accountId.toHex(), account as Entity)
+        account = new Account()
+        account.accountId = accountId.toHex()
+        account.dao = avatar as String
+        account.address = address
+        account.hasReputation = false
+        store.set('Account', accountId.toHex(), account as Account)
     }
     return accountId
 }
 
 export function updateRedemption(
-  beneficiary: Address,
-  avatar: Address,
-  absAmount: U256,
-  signedAmount: I256,
-  proposalId: Bytes,
-  rewardType: ByteArray,
-  rewardString: String,
-  time: U256
+    beneficiary: Address,
+    avatar: Address,
+    absAmount: BigInt,
+    signedAmount: BigInt,
+    proposalId: Bytes,
+    rewardType: ByteArray,
+    rewardString: String,
+    time: BigInt
 ): void {
     let accountId = createAccount(beneficiary, avatar)
     let redemptionId = crypto.keccak256(
-      concat(proposalId,
-      concat(accountId,
-      concat(rewardType,
-      concat(absAmount as ByteArray,
-             signedAmount as ByteArray))))
+        concat(proposalId,
+        concat(accountId,
+        concat(rewardType,
+        concat(absAmount as ByteArray, signedAmount as ByteArray))))
     ).toHex()
 
-    let redemption = new Entity()
-    redemption.setString('redemptionId', redemptionId)
-    redemption.setString('proposal', proposalId.toHex())
-    redemption.setString('account', accountId.toHex())
-    redemption.setString('type', rewardString)
+    let redemption = new Redemption()
+    redemption.redemptionId = redemptionId
+    redemption.proposal = proposalId.toHex()
+    redemption.account = accountId.toHex()
+    redemption.type = rewardString
     if (absAmount == null) {
-      redemption.setI256('amount', signedAmount)
+        redemption.amount = signedAmount
     } else {
-      redemption.setU256('amount', absAmount)
+        redemption.amount = absAmount
     }
-    redemption.setU256('time', time)
-    store.set('Redemption', redemptionId, redemption as Entity)
+    redemption.time = time
+    store.set('Redemption', redemptionId, redemption)
 }

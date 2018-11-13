@@ -1,11 +1,28 @@
 import 'allocator/arena'
 export { allocate_memory }
 
-import { Entity, Address, U256, Bytes, Value, store, crypto, ByteArray } from '@graphprotocol/graph-ts'
+import {
+    ByteArray,
+    store,
+} from '@graphprotocol/graph-ts'
 
-import { NewContributionProposal, RedeemReputation, RedeemEther, RedeemNativeToken, RedeemExternalToken } from '../types/ContributionReward/ContributionReward'
+import {
+    NewContributionProposal,
+    RedeemReputation,
+    RedeemEther,
+    RedeemNativeToken,
+    RedeemExternalToken,
+} from '../types/ContributionReward/ContributionReward'
 
-import { concat, updateRedemption, createAccount } from '../utils'
+import {
+    updateRedemption,
+    createAccount,
+} from '../utils'
+
+import {
+    ProposalType,
+    CRProposal,
+} from '../types/schema'
 
 const REWARD_TYPE_ETH = 0
 const REWARD_TYPE_NATIVE_TOKEN = 1 
@@ -13,20 +30,18 @@ const REWARD_TYPE_BENEFICIARY_REPUTATION = 2
 const REWARD_TYPE_EXTERNAL_TOKEN = 3
 
 export function handleNewContributionProposal(event: NewContributionProposal): void {
-    let proposalType = new Entity()
-    proposalType.setString('proposalId', event.params._proposalId.toHex())
-    proposalType.setAddress('proposalScheme', event.address)
-    proposalType.setAddress('voteInterface', event.params._intVoteInterface)
+    let proposalType = new ProposalType()
+    proposalType.proposalId = event.params._proposalId.toHex()
+    proposalType.proposalScheme = event.address
+    proposalType.voteInterface = event.params._intVoteInterface
     store.set('ProposalType', event.params._proposalId.toHex(), proposalType)
-
     let accountId = createAccount(event.params._beneficiary, event.params._avatar)
-
-    let crproposal = new Entity()
-    crproposal.setString('proposalId', event.params._proposalId.toHex())
-    crproposal.setString('contributionDescriptionHash', event.params._contributionDescription.toHex())
-    crproposal.setI256('reputationChange', event.params._reputationChange)
-    crproposal.setAddress('externalToken', event.params._externalToken)
-    crproposal.setString('beneficiary', accountId.toHex())
+    let crproposal = new CRProposal()
+    crproposal.proposalId = event.params._proposalId.toHex()
+    crproposal.contributionDescriptionHash = event.params._contributionDescription
+    crproposal.reputationChange = event.params._reputationChange
+    crproposal.externalToken = event.params._externalToken
+    crproposal.beneficiary = accountId.toHex()
     store.set('CRProposal', event.params._proposalId.toHex(), crproposal)
 }
 

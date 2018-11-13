@@ -1,11 +1,35 @@
 import 'allocator/arena'
 export { allocate_memory }
 
-import { Entity, Address, U256, Bytes, Value, store, crypto, ByteArray } from '@graphprotocol/graph-ts'
+import {
+    ByteArray,
+    store,
+} from '@graphprotocol/graph-ts'
 
-import { GPExecuteProposal, Stake, Redeem, RedeemDaoBounty, RedeemReputation,NewProposal, ExecuteProposal, VoteProposal } from '../types/GenesisProtocol/GenesisProtocol'
+import {
+    ExecuteProposal,
+    GenesisProtocol,
+    GPExecuteProposal,
+    NewProposal,
+    Redeem,
+    RedeemDaoBounty,
+    RedeemReputation,
+    Stake as StakeEvent,
+    VoteProposal,
+} from '../types/GenesisProtocol/GenesisProtocol'
 
-import { concat, updateRedemption, createAccount } from '../utils'
+import {
+    concat,
+    updateRedemption,
+    createAccount,
+} from '../utils'
+
+import {
+    Proposal,
+    Redemption,
+    Stake,
+    Vote,
+} from '../types/schema'
 
 const REWARD_TYPE_GP_REP = 4
 const REWARD_TYPE_GP_GEN = 5
@@ -13,55 +37,55 @@ const REWARD_TYPE_GP_BOUNTY = 6
 
 export function handleNewProposal(event: NewProposal): void {
     let accountId = createAccount(event.params._proposer, event.params._avatar)
-    let proposal = new Entity()
-    proposal.setString('proposalId', event.params._proposalId.toHex())
-    proposal.setAddress('dao', event.params._avatar)
-    proposal.setString('proposer', accountId.toHex())
-    proposal.setU256('submittedTime', event.block.timestamp)
-    proposal.setU256('numOfChoices', event.params._numOfChoices)
-    proposal.setBytes('paramsHash', event.params._paramsHash)
-    store.set('Proposal', event.params._proposalId.toHex(), proposal as Entity)
+    let proposal = new Proposal()
+    proposal.proposalId = event.params._proposalId.toHex()
+    proposal.dao = event.params._avatar as String
+    proposal.proposer = accountId.toHex()
+    proposal.submittedTime = event.block.timestamp
+    proposal.numOfChoices = event.params._numOfChoices
+    proposal.paramsHash = event.params._paramsHash
+    store.set('Proposal', event.params._proposalId.toHex(), proposal)
 }
 
-// TODO: add reputation of voter at time of vote
+// TODO: add reputation of voter at time of vote? Archive node needed
 export function handleVoteProposal(event: VoteProposal): void {
     let accountId = createAccount(event.params._voter, event.params._avatar)
-    let vote = new Entity()
+    let vote = new Vote()
+    vote.proposal = event.params._proposalId.toHex()
+    vote.dao = event.params._avatar as String
+    vote.voter = accountId.toHex()
+    vote.voteOption = event.params._vote
+    vote.time = event.block.timestamp
     let uniqueId = concat(event.params._proposalId, event.params._voter).toHex()
-    vote.setString('proposal', event.params._proposalId.toHex())
-    vote.setAddress('dao', event.params._avatar)
-    vote.setString('voter', accountId.toHex())
-    vote.setU256('voteOption', event.params._vote)
-    vote.setU256('time', event.block.timestamp)
-    store.set('Vote', uniqueId, vote as Entity)
+    store.set('Vote', uniqueId, vote)
 }
 
-export function handleStake(event: Stake): void {
+export function handleStake(event: StakeEvent): void {
     let accountId = createAccount(event.params._staker, event.params._avatar)
-    let stake = new Entity()
-    let uniqueId = crypto.keccak256(concat(event.params._proposalId, event.params._staker)).toHex()
-    stake.setString('proposal', event.params._proposalId.toHex())
-    stake.setAddress('dao', event.params._avatar)
-    stake.setString('staker', accountId.toHex())
-    stake.setU256('prediction', event.params._vote)
-    stake.setU256('stakeAmount', event.params._amount)
-    stake.setU256('time', event.block.timestamp)
-    store.set('Stake', uniqueId, stake as Entity)
+    let stake = new Stake()
+    stake.proposal = event.params._proposalId.toHex()
+    stake.dao = event.params._avatar as String
+    stake.staker = accountId.toHex()
+    stake.prediction = event.params._vote
+    stake.stakeAmount = event.params._amount
+    stake.time = event.block.timestamp
+    let uniqueId = concat(event.params._proposalId, event.params._staker).toHex()
+    store.set('Stake', uniqueId, stake as Stake)
 }
 
 export function handleGPExecuteProposal (event: GPExecuteProposal): void {
-    //let proposal = new Entity()
-    //proposal.setInt('state', event.params._executionState as u32)
-    //store.set('Proposal', event.params._proposalId.toHex(), proposal as Entity)
+    //let proposal = new Proposal()
+    //proposal.state = event.params._executionState
+    //store.set('Proposal', event.params._proposalId.toHex(), proposal as Proposal)
 }
 
 export function handleExecuteProposal(event: ExecuteProposal): void {
-    let proposal = new Entity()
-    proposal.setString('proposalId', event.params._proposalId.toHex())
-    proposal.setAddress('dao', event.params._avatar)
-    proposal.setU256('executionTime', event.block.timestamp)
-    proposal.setU256('decision', event.params._decision)
-    store.set('Proposal', event.params._proposalId.toHex(), proposal as Entity)
+    let proposal = new Proposal()
+    proposal.proposalId = event.params._proposalId.toHex()
+    proposal.dao = event.params._avatar as String
+    proposal.executionTime = event.block.timestamp
+    proposal.decision = event.params._decision
+    store.set('Proposal', event.params._proposalId.toHex(), proposal)
 }
 
 export function handleRedeem (event: Redeem): void {
@@ -76,7 +100,7 @@ export function handleRedeem (event: Redeem): void {
         rewardType as ByteArray,
         'gpGen',
         event.block.timestamp
-        )
+    )
 }
 
 export function handleRedeemDaoBounty (event: RedeemDaoBounty): void {
@@ -91,7 +115,7 @@ export function handleRedeemDaoBounty (event: RedeemDaoBounty): void {
         rewardType as ByteArray,
         'gpBounty',
         event.block.timestamp
-        )
+    )
 }
 
 export function handleRedeemReputation (event: RedeemReputation): void {
@@ -106,5 +130,5 @@ export function handleRedeemReputation (event: RedeemReputation): void {
         rewardType as ByteArray,
         'gpRep',
         event.block.timestamp
-        )
+    )
 }
