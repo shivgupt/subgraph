@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function wait_for {
   target=$1;
   echo "Waiting for $target to wake up..."
@@ -63,9 +65,10 @@ $graph codegen --output-dir types subgraph.$env.yaml
 wait_for "`echo $ipfs | awk -F '/' '{print $3}'`"
 echo "Compiling subgraph..."
 
-output="`$graph build --ipfs=$ipfs --output-dir=$env-dist subgraph.$env.yaml`"
+# for more info re following witchcraft: https://stackoverflow.com/a/41943779
+exec 5>&1
+output="`$graph build --ipfs=$ipfs --output-dir=$env-dist subgraph.$env.yaml | tee /dev/fd/5; exit ${PIPESTATUS[0]}`"
 subgraph="`echo $output | egrep -o "Subgraph: [a-zA-Z0-9]+" | sed 's/Subgraph: //'`"
-echo $output
 
 curl -s ipfs:8080/ipfs/$subgraph > $network_id/subgraph.yaml
 
