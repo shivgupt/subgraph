@@ -8,7 +8,7 @@
     "url": "https://github.com/daostack/subgraph.git"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=10.13.0"
   },
   "scripts": {
     "configure:mainnet": "node ops/index.js configure -e mainnet && npm run codegen",
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@daostack/arc": "0.0.0-alpha.56",
-    "@graphprotocol/graph-cli": "^0.4.0",
+    "@graphprotocol/graph-cli": "./graphprotocol-graph-cli-0.4.0.tgz",
     "@graphprotocol/graph-ts": "^0.4.0",
     "axios": "^0.18.0",
     "chalk": "^2.4.1",
