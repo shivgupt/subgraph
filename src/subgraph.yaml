@@ -91,12 +91,15 @@ dataSources:
     entities:
     - Account
     - DAO
+    - ReputationChange
     abis:
     - name: Reputation
       file: ./abis/Reputation.json
     eventHandlers:
     - event: Mint(address, uint256)
       handler: handleMint
+    - event: Burn(address, uint256)
+      handler: handleBurn
 
 - kind: ethereum/contract
   name: ContributionReward

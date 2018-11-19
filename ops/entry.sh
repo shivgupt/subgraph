@@ -1,15 +1,14 @@
 #!/bin/bash
 
 function wait_for {
-  target=$1;
+  target=$1
   echo "Waiting for $target to wake up..."
   while true
   do
     ping -c1 -w1 $target > /dev/null 2> /dev/null
-    sleep 3
     if [[ "$?" == "0" ]]
-    then break
-    else echo "Waiting for $target to wake up..."
+    then sleep 3 && break
+    else sleep 3 && echo "Waiting for $target to wake up..."
     fi
   done
 }

@@ -1,4 +1,4 @@
-FROM graphprotocol/graph-node:v0.4.1
+FROM graphprotocol/graph-node:latest
 
 RUN mkdir -p /app
 WORKDIR /app

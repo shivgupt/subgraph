@@ -2,7 +2,7 @@ type Account @entity {
     accountId: ID!
     dao: DAO!
     address: Bytes!
-    hasReputation: Boolean
+    reputation: BigInt!
     stakes: [Stake!] @derivedFrom(field: "staker")
     votes: [Vote!] @derivedFrom(field: "voter")
     proposals: [Proposal!] @derivedFrom(field: "proposer")
@@ -11,9 +11,9 @@ type Account @entity {
 
 type DAO @entity {
     avatarAddress: Bytes!
-    members: [Account!]
     controllerAddress: Bytes
     reputationAddress: Bytes
+    reputationSupply: BigInt!
     accounts: [Account!] @derivedFrom(field: "dao")
     proposals: [Proposal!] @derivedFrom(field: "dao")
 }
@@ -32,7 +32,6 @@ type Proposal @entity {
     votes: [Vote!] @derivedFrom(field: "proposal")
     stakes: [Stake!] @derivedFrom(field: "proposal")
 }
-
 type ProposalType @entity {
     proposalId: ID!
     proposalScheme: Bytes!
@@ -64,21 +63,31 @@ type Stake @entity {
     time: BigInt!
 }
 
-type Redemption @entity {
-    redemptionId: ID!
-    proposal: Proposal!
+type ReputationChange @entity {
+    dao: DAO!
     account: Account!
-    type: RewardType
+    amount: BigInt!
+    time: BigInt!
+    totalSupplyAfter: BigInt
+}
+
+type Redemption @entity {
+    dao: DAO!
+    account: Account!
+    proposal: Proposal!
+    type: RewardType!
+    token: Bytes
     amount: BigInt!
     time: BigInt!
 }
 
 enum RewardType @entity {
-    eth
-    nativeToken
-    beneficiaryReputation
-    externalToken
-    gpRep
-    gpGen
-    gpBounty
+    initialMint
+    contributionRewardNativeToken
+    contributionRewardEth
+    contributionRewardExternalToken
+    contributionRewardReputation
+    genesisProtocolReputation
+    genesisProtocolStake
+    genesisProtocolBounty
 }
