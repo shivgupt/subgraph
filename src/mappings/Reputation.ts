@@ -17,17 +17,17 @@ export function handleBurn(event: Burn): void {
     let repChange = new ReputationChange()
     repChange.dao = avatar.toHex()
     repChange.account = account.accountId
-    repChange.amount = event.params._amount
+    repChange.amount = BigInt.fromI32(-1).times(event.params._amount)
     repChange.time = event.block.timestamp
 
     // Update account balances
-    account.reputation = account.reputation.minus(repChange.amount)
+    account.reputation = account.reputation.plus(repChange.amount)
     store.set('Account', account.accountId, account)
 
     // Update the DAO reputation supply
     let dao = getDao(avatar);
     dao.reputationAddress = event.address
-    dao.reputationSupply = dao.reputationSupply.minus(repChange.amount)
+    dao.reputationSupply = dao.reputationSupply.plus(repChange.amount)
     store.set('DAO', avatar.toHex(), dao)
 
     repChange.totalSupplyAfter = dao.reputationSupply
