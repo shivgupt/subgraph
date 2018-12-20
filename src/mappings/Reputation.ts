@@ -1,6 +1,3 @@
-import 'allocator/arena'
-export { allocate_memory }
-
 import { Address, BigInt, ByteArray, crypto, store, } from '@graphprotocol/graph-ts'
 import { Burn, Mint, } from '../types/Reputation/Reputation'
 import { concat, getAccount, getDao, } from '../utils'
@@ -14,7 +11,7 @@ export function handleBurn(event: Burn): void {
     let repChangeId = crypto.keccak256(concat(event.transaction.hash, event.logIndex as ByteArray)).toHex()
 
     // Record the reputation change
-    let repChange = new ReputationChange()
+    let repChange = new ReputationChange(repChangeId)
     repChange.dao = avatar.toHex()
     repChange.account = account.accountId
     repChange.amount = BigInt.fromI32(-1).times(event.params._amount)
@@ -39,7 +36,7 @@ export function handleMint(event: Mint): void {
     let repChangeId = crypto.keccak256(concat(event.transaction.hash, event.logIndex as ByteArray)).toHex()
 
     // Record the reputation change
-    let repChange = new ReputationChange()
+    let repChange = new ReputationChange(repChangeId)
     repChange.dao = avatar.toHex()
     repChange.account = account.accountId
     repChange.amount = event.params._amount

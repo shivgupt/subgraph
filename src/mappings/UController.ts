@@ -1,6 +1,3 @@
-import 'allocator/arena'
-export { allocate_memory }
-
 import { store, } from '@graphprotocol/graph-ts'
 import { DAO, } from '../types/schema'
 import { RegisterScheme } from '../types/UController/UController'

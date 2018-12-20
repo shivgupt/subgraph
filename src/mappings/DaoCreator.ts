@@ -1,6 +1,3 @@
-import 'allocator/arena'
-export { allocate_memory }
-
 import { NewOrg } from '../types/DaoCreator/DaoCreator'
 import { getDao } from '../utils'
 

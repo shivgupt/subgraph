@@ -1,6 +1,3 @@
-import 'allocator/arena'
-export { allocate_memory }
-
 import { ByteArray, store, } from '@graphprotocol/graph-ts'
 import {
     NewContributionProposal,
@@ -15,19 +12,20 @@ import { Account, ProposalType, CRProposal, } from '../types/schema'
 import { updateRedemption, getAccount, } from '../utils'
 
 export function handleNewContributionProposal(event: NewContributionProposal): void {
-    let proposalType = new ProposalType()
-    proposalType.proposalId = event.params._proposalId.toHex()
+    let proposalId = event.params._proposalId.toHex()
+    let proposalType = new ProposalType(proposalId)
+    proposalType.proposalId = proposalId
     proposalType.proposalScheme = event.address
     proposalType.voteInterface = event.params._intVoteInterface
-    store.set('ProposalType', event.params._proposalId.toHex(), proposalType)
+    store.set('ProposalType', proposalId, proposalType)
     let account = getAccount(event.params._beneficiary, event.params._avatar)
-    let crproposal = new CRProposal()
+    let crproposal = new CRProposal(proposalId)
     crproposal.proposalId = event.params._proposalId.toHex()
     crproposal.contributionDescriptionHash = event.params._contributionDescription
     crproposal.reputationChange = event.params._reputationChange
     crproposal.externalToken = event.params._externalToken
     crproposal.beneficiary = account.accountId
-    store.set('CRProposal', event.params._proposalId.toHex(), crproposal)
+    store.set('CRProposal', proposalId, crproposal)
 }
 
 export function handleRedeemEther(event: RedeemEther): void {

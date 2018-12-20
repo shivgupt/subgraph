@@ -1,4 +1,5 @@
 type Account @entity {
+    id: ID!
     accountId: ID!
     dao: DAO!
     address: Bytes!
@@ -10,6 +11,7 @@ type Account @entity {
 }
 
 type DAO @entity {
+    id: ID!
     avatarAddress: Bytes!
     controllerAddress: Bytes
     reputationAddress: Bytes
@@ -19,6 +21,7 @@ type DAO @entity {
 }
 
 type Proposal @entity {
+    id: ID!
     proposalId: ID!
     dao: DAO!
     proposer: Account!
@@ -32,13 +35,16 @@ type Proposal @entity {
     votes: [Vote!] @derivedFrom(field: "proposal")
     stakes: [Stake!] @derivedFrom(field: "proposal")
 }
+
 type ProposalType @entity {
+    id: ID!
     proposalId: ID!
     proposalScheme: Bytes!
     voteInterface: Bytes!
 }
 
 type CRProposal @entity {
+    id: ID!
     proposalId: ID!
     beneficiary: Account!
     contributionDescriptionHash: Bytes
@@ -47,6 +53,7 @@ type CRProposal @entity {
 }
 
 type Vote @entity {
+    id: ID!
     proposal: Proposal!
     dao: DAO!
     voter: Account!
@@ -55,6 +62,7 @@ type Vote @entity {
 }
 
 type Stake @entity {
+    id: ID!
     proposal: Proposal!
     dao: DAO!
     staker: Account!
@@ -64,6 +72,7 @@ type Stake @entity {
 }
 
 type ReputationChange @entity {
+    id: ID!
     dao: DAO!
     account: Account!
     amount: BigInt!
@@ -72,6 +81,7 @@ type ReputationChange @entity {
 }
 
 type Redemption @entity {
+    id: ID!
     dao: DAO!
     account: Account!
     proposal: Proposal!

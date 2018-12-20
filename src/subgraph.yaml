@@ -29,15 +29,15 @@ dataSources:
       handler: handleVoteProposal
     - event: Stake(bytes32,address,address,uint256,uint256)
       handler: handleStake
-    - event: GPExecuteProposal(bytes32, uint8)
+    - event: GPExecuteProposal(bytes32,uint8)
       handler: handleGPExecuteProposal
-    - event: ExecuteProposal(bytes32, address, uint256, uint256)
+    - event: ExecuteProposal(bytes32,address,uint256,uint256)
       handler: handleExecuteProposal
-    - event: Redeem(bytes32, address, address, uint256)
+    - event: Redeem(bytes32,address,address,uint256)
       handler: handleRedeem
-    - event: RedeemDaoBounty(bytes32, address, address, uint256)
+    - event: RedeemDaoBounty(bytes32,address,address,uint256)
       handler: handleRedeemDaoBounty
-    - event: RedeemReputation(bytes32, address, address, uint256)
+    - event: RedeemReputation(bytes32,address,address,uint256)
       handler: handleRedeemReputation
 
 - kind: ethereum/contract
@@ -75,7 +75,7 @@ dataSources:
     - name: UController
       file: ./abis/UController.json
     eventHandlers:
-    - event: RegisterScheme(address, address, address)
+    - event: RegisterScheme(address,address,address)
       handler: handleRegisterScheme
 
 - kind: ethereum/contract
@@ -96,9 +96,9 @@ dataSources:
     - name: Reputation
       file: ./abis/Reputation.json
     eventHandlers:
-    - event: Mint(address, uint256)
+    - event: Mint(address,uint256)
       handler: handleMint
-    - event: Burn(address, uint256)
+    - event: Burn(address,uint256)
       handler: handleBurn
 
 - kind: ethereum/contract
@@ -121,15 +121,15 @@ dataSources:
     - name: ContributionReward
       file: ./abis/ContributionReward.json
     eventHandlers:
-    - event: NewContributionProposal(address, bytes32, address, bytes32, int256, uint256[5], address, address)
+    - event: NewContributionProposal(address,bytes32,address,bytes32,int256,uint256[5],address,address)
       handler: handleNewContributionProposal
-    - event: RedeemReputation(address, bytes32, address, int256)
+    - event: RedeemReputation(address,bytes32,address,int256)
       handler: handleRedeemReputation
-    - event: RedeemNativeToken(address, bytes32, address, uint256)
+    - event: RedeemNativeToken(address,bytes32,address,uint256)
       handler: handleRedeemNativeToken
-    - event: RedeemEther(address, bytes32, address, uint256)
+    - event: RedeemEther(address,bytes32,address,uint256)
       handler: handleRedeemEther
-    - event: RedeemNativeToken(address, bytes32, address, uint256)
+    - event: RedeemNativeToken(address,bytes32,address,uint256)
       handler: handleRedeemNativeToken
-    - event: RedeemExternalToken(address, bytes32, address, uint256)
+    - event: RedeemExternalToken(address,bytes32,address,uint256)
       handler: handleRedeemExternalToken
