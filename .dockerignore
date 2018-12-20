@@ -1,5 +1,8 @@
 node_modules
-package-lock.json
-*.log
-.env
-subgraph.yaml
+.cache
+.config
+.git
+.node-gyp
+.npm
+.yarn
+.yarnrc

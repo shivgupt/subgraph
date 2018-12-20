@@ -33,12 +33,13 @@ export function concat(a: ByteArray, b: ByteArray): ByteArray {
 }
 
 export function getDao (avatar: Address): DAO {
-    let dao = store.get('DAO', avatar.toHex()) as DAO
+    let daoId = avatar.toHex()
+    let dao = store.get('DAO', daoId) as DAO
     if (dao == null) {
-        dao = new DAO()
+        dao = new DAO(daoId)
         dao.avatarAddress = avatar
         dao.reputationSupply = BigInt.fromI32(0)
-        store.set('DAO', avatar.toHex(), dao)
+        store.set('DAO', daoId, dao)
     }
     return dao;
 }
@@ -47,7 +48,7 @@ export function getAccount (address: Address, avatar: Address): Account {
     let accountId = crypto.keccak256(concat(address, avatar)).toHex()
     let account = store.get('Account', accountId) as Account
     if (account == null) {
-        account = new Account()
+        account = new Account(accountId)
         account.accountId = accountId
         account.dao = avatar.toHex()
         account.address = address
@@ -72,7 +73,7 @@ export function updateRedemption(
         concat(beneficiary, typeNumber))
     ).toHex()
 
-    let redemption = new Redemption()
+    let redemption = new Redemption(redemptionId)
     redemption.dao = avatar.toHex()
     redemption.account = account.accountId
     redemption.proposal = proposalId.toHex()

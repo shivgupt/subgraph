@@ -2,20 +2,6 @@
 
 set -e
 
-function wait_for {
-  target=$1;
-  echo "Waiting for $target to wake up..."
-  while true
-  do
-    ping -c1 -w1 $target > /dev/null 2> /dev/null
-    sleep 3
-    if [[ "$?" == "0" ]]
-    then break
-    else echo "Waiting for $target to wake up..."
-    fi
-  done
-}
-
 targets="GenesisProtocol DaoCreator UController Reputation ContributionReward"
 
 if [[ -n "$1" ]]
@@ -33,11 +19,10 @@ then env=prod
 else env=dev
 fi
 
-artifacts=../contracts/build/contracts
-mkdir -p ${artifacts%/*} build/abis build/types build/$network_id
-
+mkdir -p build/abis build/types build/$network_id
+artifacts=node_modules/@daostack/arc/build/contracts
 if [[ ! -d "$artifacts" ]]
-then cp -r node_modules/@daostack/arc.js/migrated_contracts $artifacts
+then echo "Fatal: Couldn't find contract build artifacts in: $artifacts" && exit 1
 fi
 
 cp src/subgraph.yaml build/subgraph.$env.yaml
@@ -45,14 +30,20 @@ cp src/subgraph.yaml build/subgraph.$env.yaml
 for target in $targets;
 do
   echo "Processing $target..."
+  if [[ ! -f "$artifacts/$target.json" ]]
+  then echo "Fatal: couldn't find target: $artifacts/$target.json" && exit 1
+  fi
   cat $artifacts/$target.json | jq '.abi' > ./build/abis/$target.json
   address="`cat $artifacts/$target.json | jq '.networks["'$network_id'"].address' | tr -d '"'`"
+  if [[ "$address" == "null" ]]
+  then address="0x0000000000000000000000000000000000000000"
+  fi
   sed -i 's/{{'"$target"'Address}}/'"$address"'/' build/subgraph.$env.yaml
 done
 
 graph=../node_modules/.bin/graph
 cp -r src/mappings src/schema.graphql src/*.ts build/
-ln -s `pwd`/node_modules build/node_modules
+ln -sf ../node_modules build/node_modules
 
 ########################################
 cd build
@@ -62,7 +53,7 @@ graph=../node_modules/.bin/graph
 echo -n "Generating types..."
 $graph codegen --output-dir types subgraph.$env.yaml
 
-wait_for "`echo $ipfs | awk -F '/' '{print $3}'`"
+bash /ops/wait-for.sh -t 15 "`echo $ipfs | awk -F '/' '{print $3":"$5}'`" 2> /dev/null
 echo "Compiling subgraph..."
 
 # for more info re following witchcraft: https://stackoverflow.com/a/41943779
@@ -78,5 +69,3 @@ do
   echo " - $link"
   curl -s ipfs:8080$link > $network_id/${link##*/}
 done
-
-rm node_modules

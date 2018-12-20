@@ -7,9 +7,6 @@
     "type": "git",
     "url": "https://github.com/daostack/subgraph.git"
   },
-  "engines": {
-    "node": ">=10.13.0"
-  },
   "scripts": {
     "configure:mainnet": "node ops/index.js configure -e mainnet && npm run codegen",
     "configure:development": "node ops/index.js configure -e development && npm run codegen",
@@ -33,9 +30,9 @@
     "@types/mocha": "^5.2.5"
   },
   "dependencies": {
-    "@daostack/arc": "0.0.0-alpha.56",
-    "@graphprotocol/graph-cli": "^0.4.1",
-    "@graphprotocol/graph-ts": "^0.4.1",
+    "@daostack/arc": "0.0.0-alpha.50",
+    "@graphprotocol/graph-cli": "^0.5.0",
+    "@graphprotocol/graph-ts": "^0.5.0",
     "axios": "^0.18.0",
     "chalk": "^2.4.1",
     "docker-compose": "^0.9.1",
